@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=ai-legible&utm_source=comment&utm_medium=referral&utm_id=b6d206f1-d463-4d30-b204-3a5d356b7956
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="hosting-provider" content="Netlify">
+<meta name="netlify-deploy" content="https://netlify.new/?utm_campaign=ai-legible&amp;utm_source=meta&amp;utm_medium=referral&amp;utm_id=b6d206f1-d463-4d30-b204-3a5d356b7956">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bermverhalen — je digitale fietsgids</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDF1E7;
+    --bg-alt:#E1E8D9;
+    --ink:#20301F;
+    --ink-soft:#516152;
+    --ink-faint:#8B9A85;
+    --accent:#C98A1F;
+    --accent-deep:#8F5E12;
+    --accent-soft:#F1DDA9;
+    --card-bg:#FBF9F1;
+    --line:#B9C4AE;
+    --danger:#A8432F;
+    --radius:18px;
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
+  body{display:flex;flex-direction:column;min-height:100vh;min-height:100dvh;position:relative;overflow-x:hidden;}
+  h1,h2,h3{font-family:'Fraunces',serif;margin:0;font-weight:600;}
+  p{margin:0;}
+
+  .bg-texture{position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(circle at 15% 20%, rgba(201,138,31,0.06), transparent 40%),radial-gradient(circle at 85% 80%, rgba(32,48,31,0.05), transparent 45%);z-index:0;}
+
+  /* ---------- START SCREEN ---------- */
+  #screen-start{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;justify-content:center;padding:36px 26px calc(36px + var(--safe-bottom));max-width:480px;margin:0 auto;width:100%;}
+  .brand-eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:14px;}
+  #screen-start h1{font-size:44px;line-height:1.05;letter-spacing:-0.01em;}
+  #screen-start h1 em{font-style:italic;font-weight:500;color:var(--accent-deep);}
+  .subtitle{margin-top:16px;font-size:16px;line-height:1.6;color:var(--ink-soft);max-width:38ch;}
+  .divider{border:none;border-top:1.5px solid var(--line);margin:30px 0;}
+  .how-it-works{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:18px;}
+  .how-it-works li{display:flex;gap:14px;align-items:flex-start;}
+  .step-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--accent-deep);background:var(--accent-soft);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .how-it-works p{font-size:14.5px;line-height:1.55;color:var(--ink-soft);}
+  .how-it-works strong{color:var(--ink);}
+  .start-btn{margin-top:34px;width:100%;padding:18px;border:none;border-radius:14px;background:var(--ink);color:var(--bg);font-size:17px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:transform 0.15s ease, background 0.15s ease;}
+  .start-btn:active{transform:scale(0.98);background:#152016;}
+  .error-box{display:none;margin-top:14px;padding:12px 14px;border-radius:10px;background:#F6E4DE;color:var(--danger);font-size:13.5px;line-height:1.5;}
+  .privacy-note{margin-top:16px;font-size:12px;color:var(--ink-faint);text-align:center;line-height:1.5;}
+
+  /* ---------- RIDE SCREEN ---------- */
+  #screen-ride{display:none;position:relative;z-index:1;flex:1;flex-direction:column;padding:20px 20px calc(20px + var(--safe-bottom));max-width:480px;margin:0 auto;width:100%;}
+  .ride-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px;}
+  .ride-status{display:flex;align-items:center;gap:8px;}
+  .pulse-dot{width:9px;height:9px;border-radius:50%;background:var(--accent);position:relative;}
+  .pulse-dot::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--accent);animation:pulse 2s ease-out infinite;}
+  @keyframes pulse{0%{transform:scale(0.6);opacity:0.9;}100%{transform:scale(1.9);opacity:0;}}
+  .ride-status span{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-soft);}
+  .stop-link{font-size:13px;color:var(--ink-faint);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:'Inter',sans-serif;padding:4px;}
+
+  .stat-block{text-align:center;margin:26px 0 10px;}
+  .stat-value{font-family:'JetBrains Mono',monospace;font-size:52px;font-weight:600;color:var(--ink);letter-spacing:-0.01em;}
+  .stat-unit{font-size:16px;color:var(--ink-faint);margin-left:4px;}
+  .stat-label{margin-top:6px;font-size:12.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-faint);}
+
+  .ride-illustration{flex:1;display:flex;align-items:center;justify-content:center;min-height:120px;opacity:0.9;}
+
+  .found-toggle{width:100%;padding:14px;border-radius:12px;background:var(--card-bg);border:1.5px solid var(--line);display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:14px;color:var(--ink-soft);font-weight:500;}
+  .found-toggle .count{font-family:'JetBrains Mono',monospace;color:var(--accent-deep);font-weight:600;}
+  #found-list{list-style:none;margin:10px 0 0;padding:0;max-height:0;overflow:hidden;transition:max-height 0.3s ease;display:flex;flex-direction:column;gap:8px;}
+  #found-list.open{max-height:320px;overflow-y:auto;}
+  #found-list li{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--card-bg);border-radius:10px;font-size:13.5px;}
+  #found-list .tag{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--ink-faint);}
+
+  .empty-log{font-size:13px;color:var(--ink-faint);text-align:center;padding:14px 0;}
+
+  /* ---------- POI CARD ---------- */
+  #poi-card{position:fixed;left:0;right:0;bottom:0;z-index:10;transform:translateY(115%);transition:transform 0.4s cubic-bezier(.19,1,.22,1);max-width:480px;margin:0 auto;width:100%;}
+  #poi-card.show{transform:translateY(0);}
+  .card-sheet{background:var(--card-bg);border-radius:22px 22px 0 0;padding:26px 24px calc(26px + var(--safe-bottom));box-shadow:0 -12px 40px rgba(32,48,31,0.18);position:relative;max-height:78vh;overflow-y:auto;}
+  .card-grabber{width:38px;height:4px;background:var(--line);border-radius:3px;margin:0 auto 18px;}
+  .card-close-x{position:absolute;top:20px;right:20px;width:30px;height:30px;border-radius:50%;background:var(--bg-alt);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);font-size:16px;}
+  .card-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent-deep);margin-bottom:10px;}
+  .card-cat{display:inline-flex;align-items:center;gap:6px;background:var(--accent-soft);color:var(--accent-deep);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;margin-bottom:12px;}
+  #poi-card h2{font-size:25px;line-height:1.12;margin-bottom:10px;color:var(--ink);}
+  .teaser{font-size:15.5px;color:var(--ink-soft);line-height:1.55;margin-bottom:20px;}
+  .card-actions{display:flex;gap:10px;}
+  .btn-primary,.btn-secondary{flex:1;padding:15px 12px;border-radius:12px;font-size:15px;font-weight:600;border:none;cursor:pointer;text-align:center;font-family:'Inter',sans-serif;}
+  .btn-primary{background:var(--ink);color:var(--bg);}
+  .btn-primary:active{background:#152016;}
+  .btn-secondary{background:none;border:1.5px solid var(--line);color:var(--ink-soft);}
+
+  .detail{display:none;}
+  .detail.show{display:block;}
+  .detail-loading{display:flex;align-items:center;gap:10px;color:var(--ink-faint);font-size:14px;padding:6px 0 4px;}
+  .spinner{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);border-top-color:var(--accent-deep);animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .detail-text{font-size:15px;color:var(--ink-soft);line-height:1.6;margin-bottom:8px;}
+  .detail-source{font-size:12px;color:var(--ink-faint);margin-bottom:18px;}
+  .detail-source a{color:var(--accent-deep);}
+  .btn-close{width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--line);background:none;color:var(--ink-soft);font-size:14.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+
+  ::-webkit-scrollbar{width:0;}
+</style>
+</head>
+<body>
+<div class="bg-texture"></div>
+
+<!-- START SCREEN -->
+<section id="screen-start">
+  <div class="brand-eyebrow">◦ digitale fietsgids</div>
+  <h1>Berm<em>verhalen</em></h1>
+  <p class="subtitle">Fiets gewoon je route. Zodra je langs iets bijzonders komt — een monument, een uitzichtpunt, een vergeten verhaal — tikken we je zachtjes aan.</p>
+
+  <hr class="divider">
+
+  <ol class="how-it-works">
+    <li><span class="step-num">1</span><p><strong>Start de rit.</strong> We volgen je locatie alleen zolang je aan het fietsen bent.</p></li>
+    <li><span class="step-num">2</span><p><strong>Kom je iets bijzonders tegen</strong>, dan verschijnt er een klein routekaartje onderin.</p></li>
+    <li><span class="step-num">3</span><p><strong>Jij bepaalt</strong> of je het verhaal wilt horen, of gewoon doorfietst.</p></li>
+  </ol>
+
+  <button class="start-btn" id="start-btn">Start de rit →</button>
+  <div class="error-box" id="error-box"></div>
+  <p class="privacy-note">Locatie wordt alleen lokaal in je browser gebruikt. Er wordt niets opgeslagen of verzonden, behalve naar OpenStreetMap en Wikipedia om plekken in de buurt te vinden.</p>
+</section>
+
+<!-- RIDE SCREEN -->
+<section id="screen-ride">
+  <div class="ride-top">
+    <div class="ride-status">
+      <div class="pulse-dot"></div>
+      <span id="status-text">zoeken naar verhalen...</span>
+    </div>
+    <button class="stop-link" id="stop-btn">stop de rit</button>
+  </div>
+
+  <div class="stat-block">
+    <span class="stat-value" id="distance-value">0.0</span><span class="stat-unit">km</span>
+    <div class="stat-label">afgelegde afstand</div>
+  </div>
+
+  <div class="ride-illustration">
+    <svg width="120" height="70" viewBox="0 0 120 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="28" cy="52" r="14" stroke="#8F5E12" stroke-width="3"/>
+      <circle cx="92" cy="52" r="14" stroke="#8F5E12" stroke-width="3"/>
+      <path d="M28 52L48 24H66L92 52" stroke="#20301F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M48 24L58 52H28" stroke="#20301F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M58 52H92" stroke="#20301F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M66 24H74L80 32" stroke="#20301F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="66" cy="20" r="4" fill="#C98A1F"/>
+    </svg>
+  </div>
+
+  <button class="found-toggle" id="found-toggle">
+    <span>Eerder ontdekt vandaag</span>
+    <span class="count" id="found-count">0</span>
+  </button>
+  <ul id="found-list"></ul>
+</section>
+
+<!-- POI CARD -->
+<div id="poi-card">
+  <div class="card-sheet">
+    <div class="card-grabber"></div>
+    <button class="card-close-x" id="card-close-x">✕</button>
+
+    <div id="card-basic">
+      <div class="card-eyebrow">in de buurt</div>
+      <span class="card-cat" id="card-cat">Monument</span>
+      <h2 id="card-title">Naam van de plek</h2>
+      <p class="teaser" id="card-teaser">Interessant om hier meer over te weten?</p>
+      <div class="card-actions">
+        <button class="btn-primary" id="btn-more">Vertel meer</button>
+        <button class="btn-secondary" id="btn-later">Later misschien</button>
+      </div>
+    </div>
+
+    <div class="detail" id="card-detail">
+      <div class="card-eyebrow">het verhaal</div>
+      <h2 id="detail-title"></h2>
+      <div class="detail-loading" id="detail-loading"><div class="spinner"></div><span>verhaal ophalen...</span></div>
+      <p class="detail-text" id="detail-text"></p>
+      <p class="detail-source" id="detail-source"></p>
+      <button class="btn-close" id="btn-close">Sluiten en doorfietsen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var els = {
+    screenStart: document.getElementById('screen-start'),
+    screenRide: document.getElementById('screen-ride'),
+    startBtn: document.getElementById('start-btn'),
+    stopBtn: document.getElementById('stop-btn'),
+    errorBox: document.getElementById('error-box'),
+    statusText: document.getElementById('status-text'),
+    distanceValue: document.getElementById('distance-value'),
+    foundToggle: document.getElementById('found-toggle'),
+    foundCount: document.getElementById('found-count'),
+    foundList: document.getElementById('found-list'),
+    card: document.getElementById('poi-card'),
+    cardBasic: document.getElementById('card-basic'),
+    cardCat: document.getElementById('card-cat'),
+    cardTitle: document.getElementById('card-title'),
+    cardTeaser: document.getElementById('card-teaser'),
+    cardCloseX: document.getElementById('card-close-x'),
+    btnMore: document.getElementById('btn-more'),
+    btnLater: document.getElementById('btn-later'),
+    cardDetail: document.getElementById('card-detail'),
+    detailTitle: document.getElementById('detail-title'),
+    detailLoading: document.getElementById('detail-loading'),
+    detailText: document.getElementById('detail-text'),
+    detailSource: document.getElementById('detail-source'),
+    btnClose: document.getElementById('btn-close')
+  };
+
+  var CATEGORY_MAP = [
+    { query: '"tourism"="artwork"', label: 'Kunstwerk', teaser: 'Er staat hier een kunstwerk. Interessant om te weten wat het voorstelt?' },
+    { query: '"historic"="monument"', label: 'Monument', teaser: 'Je fietst langs een monument. Benieuwd naar het verhaal erachter?' },
+    { query: '"historic"="memorial"', label: 'Gedenkteken', teaser: 'Hier staat een gedenkteken. Wil je weten waar het aan herinnert?' },
+    { query: '"tourism"="viewpoint"', label: 'Uitzichtpunt', teaser: 'Er is hier een mooi uitzicht. Zin om er even voor te stoppen?' },
+    { query: '"tourism"="museum"', label: 'Museum', teaser: 'Er is een museum vlakbij. Interessant om te weten wat er te zien is?' },
+    { query: '"historic"="castle"', label: 'Kasteel', teaser: 'Je komt langs een kasteel. Wil je het verhaal erachter horen?' },
+    { query: '"historic"="ruins"', label: 'Ruïne', teaser: 'Hier liggen oude ruïnes. Interessant om te weten wat hier ooit stond?' },
+    { query: '"historic"="church"', label: 'Historische kerk', teaser: 'Deze kerk heeft een geschiedenis. Wil je er meer over weten?' },
+    { query: '"historic"="archaeological_site"', label: 'Archeologische vindplaats', teaser: 'Hier is ooit iets opgegraven. Benieuwd wat?' },
+    { query: '"natural"="tree" and "monument"="yes"', label: 'Monumentale boom', teaser: 'Deze boom is bijzonder genoeg om een monument te zijn. Meer weten?' }
+  ];
+
+  var state = {
+    watchId: null,
+    lastQueryPos: null,
+    lastPos: null,
+    totalDistance: 0,
+    found: [],
+    seenIds: {},
+    queryInFlight: false,
+    activeCardPoi: null,
+    queue: []
+  };
+
+  var QUERY_RADIUS_M = 600;
+  var TRIGGER_RADIUS_M = 220;
+  var REQUERY_AFTER_M = 400;
+
+  function haversine(lat1, lon1, lat2, lon2){
+    var R = 6371000;
+    var toRad = function(d){ return d * Math.PI / 180; };
+    var dLat = toRad(lat2 - lat1);
+    var dLon = toRad(lon2 - lon1);
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(toRad(lat1))*Math.cos(toRad(lat2)) *
+            Math.sin(dLon/2)*Math.sin(dLon/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function startRide(){
+    if(!('geolocation' in navigator)){
+      showError('Deze browser ondersteunt geen locatiebepaling.');
+      return;
+    }
+    els.errorBox.style.display = 'none';
+    navigator.geolocation.getCurrentPosition(function(pos){
+      els.screenStart.style.display = 'none';
+      els.screenRide.style.display = 'flex';
+      onPosition(pos);
+      state.watchId = navigator.geolocation.watchPosition(onPosition, onGeoError, {
+        enableHighAccuracy: true, maximumAge: 5000, timeout: 15000
+      });
+    }, onGeoError, { enableHighAccuracy: true, timeout: 15000 });
+  }
+
+  function onGeoError(err){
+    showError('Locatie kon niet worden opgehaald. Controleer of je locatietoegang hebt toegestaan.');
+  }
+
+  function showError(msg){
+    els.errorBox.textContent = msg;
+    els.errorBox.style.display = 'block';
+  }
+
+  function stopRide(){
+    if(state.watchId !== null){
+      navigator.geolocation.clearWatch(state.watchId);
+      state.watchId = null;
+    }
+    els.screenRide.style.display = 'none';
+    els.screenStart.style.display = 'flex';
+    closeCard(false);
+  }
+
+  function onPosition(pos){
+    var lat = pos.coords.latitude, lon = pos.coords.longitude;
+
+    if(state.lastPos){
+      var d = haversine(state.lastPos.lat, state.lastPos.lon, lat, lon);
+      if(d < 1000){ state.totalDistance += d; }
+      updateDistanceUI();
+    }
+    state.lastPos = { lat: lat, lon: lon };
+
+    checkTriggers(lat, lon);
+
+    if(!state.lastQueryPos || haversine(state.lastQueryPos.lat, state.lastQueryPos.lon, lat, lon) > REQUERY_AFTER_M){
+      queryOverpass(lat, lon);
+    }
+  }
+
+  function updateDistanceUI(){
+    els.distanceValue.textContent = (state.totalDistance / 1000).toFixed(1);
+  }
+
+  function checkTriggers(lat, lon){
+    if(els.card.classList.contains('show')) return;
+    for(var i=0;i<state.queue.length;i++){
+      var poi = state.queue[i];
+      var d = haversine(lat, lon, poi.lat, poi.lon);
+      if(d <= TRIGGER_RADIUS_M){
+        state.queue.splice(i,1);
+        presentPoi(poi);
+        return;
+      }
+    }
+  }
+
+  function queryOverpass(lat, lon){
+    if(state.queryInFlight) return;
+    state.queryInFlight = true;
+    state.lastQueryPos = { lat: lat, lon: lon };
+    els.statusText.textContent = 'zoeken naar verhalen...';
+
+    var url = '/.netlify/functions/nearby?lat=' + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon) + '&radius=' + QUERY_RADIUS_M;
+
+    fetch(url).then(function(r){
+      if(!r.ok) throw new Error('overpass error');
+      return r.json();
+    }).then(function(data){
+      state.queryInFlight = false;
+      els.statusText.textContent = 'onderweg';
+      var elements = data.elements || [];
+      elements.forEach(function(el){
+        if(state.seenIds[el.id]) return;
+        state.seenIds[el.id] = true;
+        var cat = classify(el.tags || {});
+        state.queue.push({
+          id: el.id, lat: el.lat, lon: el.lon,
+          tags: el.tags || {}, category: cat
+        });
+      });
+      if(state.lastPos){ checkTriggers(state.lastPos.lat, state.lastPos.lon); }
+    }).catch(function(){
+      state.queryInFlight = false;
+      els.statusText.textContent = 'onderweg';
+    });
+  }
+
+  function classify(tags){
+    if(tags.tourism === 'artwork') return CATEGORY_MAP[0];
+    if(tags.historic === 'monument') return CATEGORY_MAP[1];
+    if(tags.historic === 'memorial') return CATEGORY_MAP[2];
+    if(tags.tourism === 'viewpoint') return CATEGORY_MAP[3];
+    if(tags.tourism === 'museum') return CATEGORY_MAP[4];
+    if(tags.historic === 'castle') return CATEGORY_MAP[5];
+    if(tags.historic === 'ruins') return CATEGORY_MAP[6];
+    if(tags.historic === 'church') return CATEGORY_MAP[7];
+    if(tags.historic === 'archaeological_site') return CATEGORY_MAP[8];
+    return CATEGORY_MAP[1];
+  }
+
+  function presentPoi(poi){
+    state.activeCardPoi = poi;
+    var tags = poi.tags;
+    var name = tags.name || tags['name:nl'] || (poi.category.label + ' zonder naam');
+
+    els.cardCat.textContent = poi.category.label;
+    els.cardTitle.textContent = name;
+    els.cardTeaser.textContent = poi.category.teaser;
+
+    els.cardBasic.style.display = 'block';
+    els.cardDetail.classList.remove('show');
+    els.card.classList.add('show');
+
+    state.found.unshift({ name: name, label: poi.category.label, read: null });
+    renderFoundList();
+  }
+
+  function closeCard(logAsLater){
+    els.card.classList.remove('show');
+    if(logAsLater && state.found[0] && state.found[0].read === null){
+      state.found[0].read = false;
+      renderFoundList();
+    }
+    state.activeCardPoi = null;
+  }
+
+  function renderFoundList(){
+    els.foundCount.textContent = state.found.length;
+    els.foundList.innerHTML = '';
+    state.found.slice(0, 30).forEach(function(item){
+      var li = document.createElement('li');
+      var statusLabel = item.read === null ? 'onderweg' : (item.read ? 'gelezen' : 'overgeslagen');
+      li.innerHTML = '<span>' + escapeHtml(item.name) + '</span><span class="tag">' + statusLabel + '</span>';
+      els.foundList.appendChild(li);
+    });
+  }
+
+  function escapeHtml(s){
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  function showMoreDetail(){
+    els.cardBasic.style.display = 'none';
+    els.cardDetail.classList.add('show');
+    els.detailLoading.style.display = 'flex';
+    els.detailText.textContent = '';
+    els.detailSource.textContent = '';
+    els.detailTitle.textContent = els.cardTitle.textContent;
+
+    if(state.found[0]){ state.found[0].read = true; renderFoundList(); }
+    fetchWikipedia(state.activeCardPoi);
+  }
+
+  function fetchWikipedia(poi){
+    if(!poi){ renderNoDetail(); return; }
+    var tags = poi.tags;
+    var lang = 'nl', title = null;
+
+    if(tags['wikipedia:nl']){
+      title = tags['wikipedia:nl'];
+    } else if(tags.wikipedia){
+      var parts = tags.wikipedia.split(':');
+      if(parts.length === 2){ lang = parts[0]; title = parts[1]; }
+      else { title = tags.wikipedia; }
+    } else if(tags.name){
+      title = tags.name;
+    }
+
+    if(!title){ renderNoDetail(); return; }
+
+    var url = 'https://' + lang + '.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(title);
+    fetch(url).then(function(r){
+      if(!r.ok) throw new Error('not found');
+      return r.json();
+    }).then(function(data){
+      els.detailLoading.style.display = 'none';
+      els.detailText.textContent = data.extract || 'Geen beschrijving gevonden, maar de plek is de moeite waard.';
+      if(data.content_urls && data.content_urls.desktop){
+        els.detailSource.innerHTML = 'Bron: <a href="' + data.content_urls.desktop.page + '" target="_blank" rel="noopener">Wikipedia</a>';
+      } else {
+        els.detailSource.textContent = 'Bron: Wikipedia';
+      }
+    }).catch(function(){
+      renderNoDetail();
+    });
+  }
+
+  function renderNoDetail(){
+    els.detailLoading.style.display = 'none';
+    els.detailText.textContent = 'Geen extra verhaal gevonden — maar deze plek werd de moeite waard genoeg gevonden om op de kaart te staan.';
+    els.detailSource.textContent = 'Bron: OpenStreetMap';
+  }
+
+  function toggleFoundList(){
+    els.foundList.classList.toggle('open');
+  }
+
+  els.startBtn.addEventListener('click', startRide);
+  els.stopBtn.addEventListener('click', stopRide);
+  els.btnMore.addEventListener('click', showMoreDetail);
+  els.btnLater.addEventListener('click', function(){ closeCard(true); });
+  els.btnClose.addEventListener('click', function(){ closeCard(false); });
+  els.cardCloseX.addEventListener('click', function(){ closeCard(true); });
+  els.foundToggle.addEventListener('click', toggleFoundList);
+
+})();
+</script>
+</body>
+</html>
