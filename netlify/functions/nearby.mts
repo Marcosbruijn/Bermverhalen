@@ -46,10 +46,14 @@ export default async (req: Request, context: Context) => {
     const resp = await fetch(overpassUrl, {
       headers: {
         accept: "application/json",
-        // Overpass's usage policy asks clients to identify themselves;
-        // requests with a generic/no User-Agent from cloud IP ranges are
-        // known to get silently throttled (empty results, still HTTP 200).
-        "user-agent": "Bermverhalen/1.0 (digital cycling guide; https://bermverhalen.netlify.app)"
+        // A browser always sends Accept-Language/Accept-Encoding automatically;
+        // Node's fetch sends neither unless told to. Overpass's Apache front-end
+        // does content negotiation and returns 406 Not Acceptable when those are
+        // missing — confirmed via a ?debug=1 call to this function. Setting them
+        // explicitly, plus a real-looking User-Agent, mimics a browser request.
+        "accept-language": "nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7",
+        "accept-encoding": "gzip, deflate, br",
+        "user-agent": "Mozilla/5.0 (compatible; Bermverhalen/1.0; +https://bermverhalen.netlify.app)"
       },
       signal: controller.signal
     });
