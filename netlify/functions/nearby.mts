@@ -37,17 +37,32 @@ export default async (req: Request, context: Context) => {
   const query = `[out:json][timeout:15];(${clauses});out body 40;`;
   const overpassUrl = "https://overpass-api.de/api/interpreter?data=" + encodeURIComponent(query);
 
+  const debug = url.searchParams.get("debug") === "1";
+
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 9000);
 
   try {
     const resp = await fetch(overpassUrl, {
-      headers: { accept: "application/json" },
+      headers: {
+        accept: "application/json",
+        // Overpass's usage policy asks clients to identify themselves;
+        // requests with a generic/no User-Agent from cloud IP ranges are
+        // known to get silently throttled (empty results, still HTTP 200).
+        "user-agent": "Bermverhalen/1.0 (digital cycling guide; https://bermverhalen.netlify.app)"
+      },
       signal: controller.signal
     });
     clearTimeout(timeoutId);
 
     if (!resp.ok) {
+      if (debug) {
+        const bodyText = await resp.text();
+        return new Response(JSON.stringify({ debug: true, upstreamStatus: resp.status, upstreamStatusText: resp.statusText, upstreamBody: bodyText.slice(0, 500) }), {
+          status: 200,
+          headers: { "content-type": "application/json" }
+        });
+      }
       // Fail soft: the app just treats "no POIs this query" as normal.
       return new Response(JSON.stringify({ elements: [] }), {
         status: 200,
@@ -56,12 +71,24 @@ export default async (req: Request, context: Context) => {
     }
 
     const data = await resp.json();
+    if (debug) {
+      return new Response(JSON.stringify({ debug: true, upstreamStatus: resp.status, elementCount: (data.elements || []).length, queryUsed: query }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      });
+    }
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { "content-type": "application/json" }
     });
   } catch (err) {
     clearTimeout(timeoutId);
+    if (debug) {
+      return new Response(JSON.stringify({ debug: true, caughtError: String(err) }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      });
+    }
     return new Response(JSON.stringify({ elements: [] }), {
       status: 200,
       headers: { "content-type": "application/json" }
